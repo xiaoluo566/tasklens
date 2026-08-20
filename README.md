@@ -2,11 +2,11 @@
 
 单 Agent AI 浏览器测试与运行观测平台（设计阶段）
 
-> 当前仓库仅完成二次开发前的需求与架构设计，尚未实现 Dashboard、运行记录或新增 API。仓库中的浏览器控制能力来自上游 `browser-use/browser-harness`，不能将其误写为本项目独立实现。
+> 当前仓库仅完成开发前的需求与架构设计，尚未实现 Dashboard、运行记录或新增 API。浏览器控制能力基于开源 `browser-use/browser-harness`，TaskLens 的个人开发范围是单 Agent Runtime、断言、证据存储、API、Dashboard 与测试体系。
 
 ## 项目简介
 
-TaskLens 是基于 [browser-use/browser-harness](https://github.com/browser-use/browser-harness) 的个人二次开发项目，计划为单 Agent AI 浏览器任务增加执行闭环和本地优先的运行观测层：沉淀脱敏后的运行历史、校验业务结果、复盘失败步骤、比较 helper 耗时，并通过 FastAPI 和响应式 Dashboard 展示证据。
+TaskLens 是一个面向复杂网页流程的单 Agent AI 浏览器测试与运行观测个人项目，基于 [browser-use/browser-harness](https://github.com/browser-use/browser-harness) 与 CDP 构建浏览器操作层，计划沉淀脱敏运行历史、校验业务结果、复盘失败步骤、比较 helper 耗时，并通过 FastAPI 和响应式 Dashboard 展示证据。
 
 项目不重新实现 CDP 浏览器控制。核心价值是围绕成熟 Harness 做增量设计，并处理测试开发场景中容易被忽略的失败语义、敏感数据、兼容性和可验证性。
 
@@ -14,7 +14,7 @@ TaskLens 是基于 [browser-use/browser-harness](https://github.com/browser-use/
 
 | 项目 | 状态 |
 | --- | --- |
-| 上游 Fork 与本地克隆 | 已完成 |
+| 个人仓库与开源依赖基线 | 已完成 |
 | 独立项目命名与开发分支 | 已完成 |
 | PRD、架构、需求、九天路线图 | 已完成 |
 | 单 Agent Runtime、任务断言与运行记录 | 设计完成，待实现 |
@@ -35,10 +35,10 @@ TaskLens 是基于 [browser-use/browser-harness](https://github.com/browser-use/
 ## 设计文档
 
 - [设计入口](docs/observability/README.md)
-- [项目全景分析：上游能力、短板与二开路线](docs/observability/PROJECT_ANALYSIS.md)
+- [项目全景分析：开源能力、短板与开发路线](docs/observability/PROJECT_ANALYSIS.md)
 - [项目简介与简历边界](docs/observability/PROJECT_BRIEF.md)
 - [简历成稿与面试口径](docs/observability/RESUME_DRAFT.md)
-- [单 Agent 二次开发能力规格](docs/observability/SECONDARY_DEVELOPMENT_SPEC.md)
+- [单 Agent 项目开发能力规格](docs/observability/DEVELOPMENT_SPEC.md)
 - [产品需求文档](docs/observability/PRD.md)
 - [架构设计](docs/observability/ARCHITECTURE.md)
 - [需求与验收矩阵](docs/observability/REQUIREMENTS.md)
@@ -73,4 +73,4 @@ TaskLens 是基于 [browser-use/browser-harness](https://github.com/browser-use/
 - 当前基线：`browser-harness 0.1.9`，上游提交 `41108b8`
 - 上游许可证：[MIT](LICENSE)
 
-本项目会保留 `upstream` 远端以同步官方更新，并将个人二开提交隔离在独立分支。
+本项目会保留 `upstream` 远端以同步开源依赖更新，并将 TaskLens 功能提交隔离在独立分支。

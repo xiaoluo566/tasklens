@@ -1,16 +1,16 @@
-# TaskLens 二次开发能力规格
+# TaskLens 项目开发能力规格
 
 > 这是简历项目的开发交接文档。它把产品目标、工程约束、模块接口和验收证据固定下来，供后续编码、测试和面试演示使用。执行架构冻结为单 Agent；当前仅完成规格设计，文中的“计划/拟议”需要在后续开发中兑现。
 
 ## CAPABILITY
 
-TaskLens 为 `browser-use/browser-harness` 增加一个本地优先的单 Agent AI 浏览器测试能力：用户提交自然语言目标后，由一个 Agent Runtime 循环完成页面观察、动作选择、helper 执行、结果校验和有界重试；测试开发者可以在不改变原任务退出码的前提下，查看脱敏后的运行摘要、helper 步骤、失败阶段和耗时，并通过只读页面进行筛选和复盘。它复用上游浏览器连接与 CDP 控制，新增的是单 Agent 执行闭环和测试证据层。
+TaskLens 基于 `browser-harness` 与 CDP 构建本地优先的单 Agent AI 浏览器测试能力：用户提交自然语言目标后，由一个 Agent Runtime 循环完成页面观察、动作选择、helper 执行、结果校验和有界重试；测试开发者可以在不改变原任务退出码的前提下，查看脱敏后的运行摘要、helper 步骤、失败阶段和耗时，并通过页面进行筛选和复盘。开源依赖提供浏览器连接与 CDP 控制，TaskLens 负责单 Agent 执行闭环和测试证据层。
 
 ## CONSTRAINTS
 
 ### 固定规则
 
-1. **上游兼容**：保留 `browser-harness` Python 包名和既有 CLI/helper 契约；新增能力通过独立模块和旁路 Hook 接入。
+1. **依赖兼容**：保留 `browser-harness` Python 包名和既有 CLI/helper 契约；TaskLens 能力通过独立模块、Browser Adapter 和旁路 Hook 接入。
 2. **主流程优先**：观测模块出现写入、序列化或页面服务异常时，原脚本输出和退出码保持不变。
 3. **本地优先**：默认存储在现有配置目录，默认只监听 `127.0.0.1`，不上传任务原文，不提供远程写接口。
 4. **数据最小化**：不保存完整 stdin 脚本、Cookie、页面 HTML 或默认截图内容；URL 去除 query/fragment，敏感键先脱敏再截断。
@@ -42,9 +42,10 @@ TaskLens 为 `browser-use/browser-harness` 增加一个本地优先的单 Agent 
 | --- | --- | --- |
 | `src/browser_harness/run.py` | 捕获开始/结束、已有 helper trace 和退出状态 | 存储实现、HTML 生成 |
 | `src/browser_harness/agent_runtime.py` | 单 Agent 状态机、观察/动作/校验循环、步骤预算和有界重试 | 多 Agent 编排、浏览器底层连接 |
+| `src/browser_harness/browser_adapter.py` | 封装会话、页面观察和 helper 动作，统一错误映射 | 模型决策、证据存储 |
 | `src/browser_harness/observability.py` | 脱敏、Pydantic 模型、证据构建 | 浏览器连接、监听端口 |
 | `src/browser_harness/storage.py` | SQLite 追加、读取、过滤、聚合和迁移边界 | 浏览器连接、页面展示 |
-| `src/browser_harness/dashboard.py` | 只读 API、自包含页面、启动参数 | 改写任务或历史记录 |
+| `src/browser_harness/dashboard.py` | FastAPI 路由、自包含页面、启动参数 | 浏览器动作实现、改写历史记录 |
 | `tests/unit/` | 脱敏、生命周期、存储和边界测试 | 真实浏览器业务断言 |
 | `tests/integration/` / E2E | API 和用户关键闭环 | 修改产品数据 |
 
@@ -64,7 +65,7 @@ received -> planning -> observing -> acting -> verifying -> succeeded
 `status` 描述任务最终状态；`failure_kind` 描述失败归因，建议枚举为：
 
 ```text
-none | environment | connection | action | assertion | timeout | cancelled | unknown
+none | environment | connection | action | assertion | timeout | cancelled | model | unknown
 ```
 
 观测自身的错误不覆盖主任务状态，只记录到 Dashboard health 或服务日志中。
@@ -79,7 +80,8 @@ none | environment | connection | action | assertion | timeout | cancelled | unk
   "finished_at": "ISO-8601 UTC",
   "duration_seconds": 3.12,
   "status": "success | failed | timeout | cancelled",
-  "failure_kind": "none | environment | connection | action | assertion | timeout | cancelled | unknown",
+  "failure_kind": "none | environment | connection | action | assertion | timeout | cancelled | model | unknown",
+  "first_deviation_step": 3,
   "browser_backend": "local | cdp | cloud | unknown",
   "exit_code": 0,
   "output_tail": "redacted-bounded-output",
@@ -94,7 +96,7 @@ none | environment | connection | action | assertion | timeout | cancelled | unk
       "args_summary": "redacted-bounded-args",
       "duration_seconds": 0.8,
       "status": "success | failed",
-      "failure_kind": "none | environment | connection | action | assertion | timeout | unknown",
+      "failure_kind": "none | environment | connection | action | assertion | timeout | model | unknown",
       "assertions": [{"name": "element-visible", "status": "passed", "evidence": "bounded-ref"}],
       "error_summary": null
     }
@@ -102,7 +104,7 @@ none | environment | connection | action | assertion | timeout | cancelled | unk
 }
 ```
 
-P0 必须稳定的字段：`run_id`、时间、状态、退出码、浏览器后端、步骤名称、步骤耗时和脱敏错误摘要。`task_name`、`failure_kind` 和版本摘要可以先作为可选字段，但一旦写入记录就必须遵守相同的脱敏规则。
+P0 必须稳定的字段：`run_id`、时间、状态、退出码、浏览器后端、步骤名称、步骤耗时、`failure_kind`、`first_deviation_step` 和脱敏错误摘要。首次偏离步骤取最早失败的动作或断言；无法定位时必须返回 `null`，不能猜测。
 
 ### Task contract
 
@@ -169,7 +171,7 @@ Runtime 输出 `AgentResult`，至少包含 `status`、`failure_kind`、`answer_
 | 编号 | 简历可用表述 | 当前证据 | P0 完成后的证据 |
 | --- | --- | --- | --- |
 | R1 | 设计单 Agent Runtime 状态机和有界重试 | 本规格、`PROJECT_ANALYSIS.md` | `agent_runtime.py`、状态机测试、执行日志 |
-| R2 | 梳理 CLI/daemon/helper 生命周期并采用旁路扩展 | `PROJECT_ANALYSIS.md`、`ARCHITECTURE.md` | `run.py` Hook diff、回归测试 |
+| R2 | 抽象 Browser Adapter 并隔离浏览器生命周期 | `PROJECT_ANALYSIS.md`、`ARCHITECTURE.md` | Adapter 实现、`run.py` Hook diff、回归测试 |
 | R3 | 设计 `RunRecord`/`StepRecord`、断言和失败语义 | `ARCHITECTURE.md`、本规格 | 模型单测、样例 SQLite、API 响应 |
 | R4 | 设计脱敏、限长、回环监听和 fail-open | `PRD.md`、`REQUIREMENTS.md` | 脱敏测试、写入失败测试、安全审查 |
 | R5 | 规划只读 API 和 Dashboard | `PRD.md`、`REQUIREMENTS.md` | API 集成测试、页面截图、Playwright 报告 |
@@ -183,7 +185,7 @@ Runtime 输出 `AgentResult`，至少包含 `status`、`failure_kind`、`answer_
 4. **执行接入**：在 `run.py` 的正常返回、`SystemExit` 和异常路径生成记录，并验证 fail-open。
 5. **API 闭环**：实现 health、summary、runs、detail、任务启动和统一错误 envelope。
 6. **页面闭环**：实现空状态、运行列表、失败详情、耗时排序、步骤回放和窄屏布局。
-7. **验证交付**：运行上游回归、覆盖率、Ruff、Pyright、Docker 启动和真实浏览器 E2E，保存可公开的脱敏证据。
+7. **验证交付**：运行开源基线回归、覆盖率、Ruff、Pyright、Docker 启动和真实浏览器 E2E，保存可公开的脱敏证据。
 
 ## OPEN QUESTIONS
 

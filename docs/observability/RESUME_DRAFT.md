@@ -1,81 +1,44 @@
-# TaskLens 简历成稿与开发兑现清单
+# TaskLens 简历成稿
 
-> 目标岗位：测试开发实习生、AI 测试开发、自动化测试开发。  
-> 下面的项目条目按“功能完成态”撰写；后续开发必须按同一份规格实现并补齐测试证据。架构明确采用**单 Agent**，不使用多 Agent 协作。
+## 项目经历
 
-## 1. 可直接放入简历的项目条目
+### TaskLens
 
-### TaskLens｜单 Agent AI 浏览器测试与运行观测平台
+个人项目
 
-**技术栈：** Python、FastAPI、Pydantic v2、CDP/WebSocket、SQLite、Pytest、Playwright、Docker
+2026.08 - 至今
 
-**项目介绍：**
+**技术栈：** Python / FastAPI / Pydantic v2 / CDP / SQLite / Pytest / Playwright
 
-基于开源 `browser-use/browser-harness` 进行二次开发，面向复杂网页流程的单 Agent 自动化测试。平台以自然语言任务为入口，围绕“任务理解 → 页面观察 → 动作执行 → 结果校验 → 失败归因 → 有界重试 → 终态判定”构建执行闭环，并将任务过程沉淀为可脱敏、可查询、可回放的测试证据，解决浏览器 Agent 黑盒执行难定位、难复现和难回归的问题。
+**项目介绍：** TaskLens 是一个面向复杂网页流程的单 Agent AI 浏览器测试平台，支持自然语言任务执行、结果校验、失败归因与步骤回放，将“任务理解 → 页面观察 → 动作执行 → 结果验证 → 终态判定”的黑盒过程转化为可观察、可解释、可追溯的测试证据。
 
-**个人工作：**
+- 围绕复杂网页任务的单 Agent 执行闭环，搭建从 `TaskSpec`、页面 Observation 到 Action、Assertion、`AgentResult` 的可追溯状态链，将自然语言目标转化为受最大步数、任务级超时和幂等重试约束的浏览器动作，解决 Agent 执行状态分散、终止条件不清的问题。
 
-- 设计单 Agent Runtime 状态机，以 `TaskSpec`、`StepResult` 和 `RunRecord` 统一任务目标、页面观察、浏览器动作、断言结果和最终状态；通过步骤级超时、最大步数和幂等策略控制循环，避免模型在异常页面中无限执行。
-- 基于 `browser-harness` 封装 Browser Adapter，复用 daemon、CDP WebSocket、Tab/DOM 感知和点击、输入、滚动、等待、截图等 helper 能力，为 Agent 提供稳定的浏览器操作接口，并隔离浏览器连接异常与业务断言失败。
-- 设计并实现本地运行证据层，使用 Pydantic v2 校验 `RunRecord`/`StepRecord`，通过 SQLite 持久化任务、步骤、断言和错误摘要；对 URL 参数、Token、Cookie、Authorization、Password 等敏感数据执行字段级脱敏和长度限制。
-- 使用 FastAPI 提供 health、任务运行、运行列表、运行详情和统计接口，设计统一错误响应、状态过滤和分页边界；通过响应式 Dashboard 展示成功率、失败步骤、慢操作和单次任务回放信息。
-- 围绕“模型决策—浏览器动作—页面状态—业务结果”关键路径编写 Pytest 单元/集成测试，使用 Ruff、Pyright 做静态检查，并通过 Playwright 验证真实浏览器下的任务执行、失败筛选和证据详情闭环。
-- 采用 fail-open 观测策略和分层故障模型：记录或页面服务异常不会改变主任务结果；将环境、连接、动作、断言、超时和模型输出异常分开统计，便于回归定位和问题归因。
+- 基于 `browser-harness` 与 CDP 协议抽象 Browser Adapter，统一浏览器会话、页面状态提取及点击、输入、滚动、等待、截图等动作接口，将 Agent 决策与底层浏览器生命周期解耦，并区分环境、连接、动作与业务断言失败，提升执行链路的可替换性与故障隔离能力。
 
-## 2. 简历空间不足时的压缩版
+- 引入文本、元素状态和结构化结果断言，构建“动作执行结果—页面状态证据—业务终态判定”的分层验证机制，将 helper 调用成功与业务结果正确分开判定，并通过首次偏离步骤和失败类型归因定位环境异常、模型决策错误与页面执行失败。
 
-**项目介绍：** 基于 `browser-use/browser-harness` 二次开发单 Agent AI 浏览器测试平台，构建任务理解、页面观察、动作执行、结果校验和失败复盘闭环，将浏览器 Agent 的黑盒过程转化为可查询的运行证据。
+- 通过 Pydantic v2、SQLite 与 FastAPI 建立从任务、步骤、断言到错误摘要的运行证据链，配合字段脱敏、长度限制和 fail-open 降级策略保证观测异常不影响主任务；使用 Pytest、Ruff、Pyright 与 Playwright 覆盖状态流转、接口契约、异常分支和真实浏览器关键流程。
 
-- 设计单 Agent Runtime 与步骤级状态机，统一 TaskSpec、浏览器动作、断言结果、超时/重试和最终状态。
-- 基于 CDP/WebSocket 封装 Browser Adapter，复用 daemon 与 helper 能力；使用 Pydantic + SQLite 沉淀脱敏运行记录，并通过 FastAPI + Dashboard 提供筛选、统计和详情回放。
-- 使用 Pytest、Ruff、Pyright 和 Playwright 覆盖执行链路、故障分支、API 契约和真实浏览器关键流程，采用 fail-open 保证观测层异常不阻断主任务。
+## 精简版
 
-## 3. 与已有 Skill 评估项目的组合叙事
+简历空间不足时保留下面三条：
 
-两个项目分别放在不同层次：
+- 构建单 Agent Runtime、Browser Adapter、Evidence Store 与 Dashboard，形成任务理解、页面观察、动作执行、结果校验和失败复盘闭环。
+- 基于 `browser-harness` 与 CDP 封装浏览器会话、页面状态及点击/输入/等待等动作能力，通过任务超时、最大步数、幂等重试和业务断言控制执行风险。
+- 使用 Pydantic v2 + SQLite 沉淀脱敏运行证据，基于 FastAPI + Dashboard 展示运行历史、失败步骤和耗时，并通过 Pytest/Playwright 验证关键链路。
 
-| 项目 | 关注层 | 关键词 |
+## 与开发文档的对应关系
+
+| 简历内容 | 对应开发契约 | 实现证据 |
 | --- | --- | --- |
-| Skill 评估体系项目 | Skill/Agent 的测试、自证和迭代评估 | 评估指标、测试飞轮、自证飞轮、Harness 设计 |
-| TaskLens | 单 Agent 在真实浏览器中的执行、验证和回归证据 | CDP、状态机、断言、脱敏、故障归因、可观测性 |
+| 单 Agent 执行闭环 | `DEVELOPMENT_SPEC.md` 的 Runtime 生命周期 | `agent_runtime.py` 及状态机测试 |
+| Browser Adapter / CDP | `ARCHITECTURE.md` 的模块边界 | `browser_adapter.py` 及连接/动作测试 |
+| 业务结果校验 | `REQUIREMENTS.md` 的断言需求 | 文本、元素状态、结构化结果断言测试 |
+| Pydantic + SQLite | `DEVELOPMENT_SPEC.md` 的数据契约 | 模型、schema、repository 及事务测试 |
+| FastAPI + Dashboard | `PRD.md` 的用户流程与 API 契约 | API 集成测试、页面截图、Playwright 报告 |
+| 故障归因与 fail-open | `ARCHITECTURE.md` 的失败语义 | environment/connection/action/assertion/timeout/model 测试 |
 
-面试串联：
+## 项目边界
 
-> 第一个项目回答“如何评价一个 Skill/Agent”，TaskLens 回答“一个单 Agent 在真实浏览器里执行后，如何证明结果正确、定位失败并支持回归”。
-
-## 4. 面试时的关键解释
-
-### 为什么只做单 Agent？
-
-九天周期内，单 Agent 更容易把“观察—行动—校验”闭环做深：状态、证据、重试和失败归因可以统一建模，避免多 Agent 协作带来的通信、调度和结果合并噪声。后续如果需要扩展，多 Agent 只应作为上层编排能力接入，不改变底层 Browser Adapter 和证据契约。
-
-### 和普通 UI 自动化脚本有什么区别？
-
-普通脚本通常只验证一条固定路径；TaskLens 让单 Agent 根据页面状态选择动作，并把每一步的观察、操作、断言和错误保存下来，支持失败复盘、运行比较和后续回归。
-
-### 为什么保留上游 Harness？
-
-上游已经处理真实浏览器连接、CDP 会话、标签页管理和基础 helper。二开重点放在 Agent Runtime、结果校验和测试证据层，既减少重复代码，也让上游同步和回退边界清晰。
-
-### 为什么 SQLite 而不是直接上云数据库？
-
-首版目标是单机可演示、可复现和低运维成本。SQLite 足以支撑任务、步骤和统计查询，同时保留仓储接口，后续可以迁移到 PostgreSQL；云端多租户和权限不放进九天首版。
-
-## 5. 开发兑现清单
-
-简历中的完成态表述必须由以下证据支撑：
-
-| 简历能力 | 必须落地的证据 |
-| --- | --- |
-| 单 Agent Runtime | `agent_runtime.py`、状态机单测、成功/超时/重试样例 |
-| Browser Adapter | CDP/daemon/helper 适配代码、连接失败测试 |
-| 任务和步骤记录 | `TaskSpec`、`RunRecord`、`StepRecord` 模型及 SQLite schema |
-| 结果校验 | 至少三类断言：文本、元素状态、结构化结果 |
-| 故障归因 | environment/connection/action/assertion/timeout/model 分类测试 |
-| API 与 Dashboard | FastAPI 路由、响应 schema、页面截图和 Playwright 报告 |
-| 工程质量 | Pytest 覆盖率、Ruff、Pyright、Docker 启动和 README 演示 |
-
-## 6. 不能混入本项目的表述
-
-为了保持项目边界清楚，除非后续明确实现，不要写：多 Agent 协作、人工接管、跨机器并发调度、在线多租户、自动根因分析或线上用户数据。它们不是本项目的核心卖点，反而会增加面试时的追问风险。
-
+TaskLens 在简历中统一按个人项目表述，技术依赖写为“基于 `browser-harness` 与 CDP 构建浏览器操作层”。面试时需要准确说明：开源依赖提供浏览器连接和基础 helper，个人负责单 Agent Runtime、任务契约、断言、证据存储、API、Dashboard 与测试体系。

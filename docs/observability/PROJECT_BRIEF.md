@@ -2,7 +2,7 @@
 
 ## 一句话定位
 
-TaskLens 是基于开源 `browser-use/browser-harness` 二次开发的单 Agent AI 浏览器测试与运行观测平台：让 Agent 在真实浏览器中执行复杂网页任务，并留下可验证、可脱敏、可回放的测试证据。
+TaskLens 是一个单 Agent AI 浏览器测试与运行观测平台：基于 `browser-harness` 与 CDP 构建浏览器操作层，让 Agent 在真实浏览器中执行复杂网页任务，并留下可验证、可脱敏、可回放的测试证据。
 
 ## 项目介绍
 
@@ -28,18 +28,18 @@ Python 3.11+、FastAPI、Pydantic v2、CDP、WebSocket、SQLite、Pytest、Playw
 2. **结果而非只看动作**：helper 调用成功不直接等价于业务成功，文本、元素状态和结构化结果断言独立记录。
 3. **证据可追溯**：每次运行拥有 `run_id`，每个步骤记录观察摘要、动作、耗时、断言和失败归因，可从总览下钻到首次偏离步骤。
 4. **安全与降级**：URL 去除 query/fragment，Token/Cookie/Authorization 等字段脱敏后再截断；存储或观测故障不改变主任务退出码。
-5. **增量二开**：不重写上游 CDP 控制和浏览器生命周期，通过 Browser Adapter 隔离上游变化，保留同步和回退空间。
+5. **依赖隔离**：不重复实现 CDP 控制和浏览器生命周期，通过 Browser Adapter 隔离开源依赖变化，保留升级和回退空间。
 
 ## 简历描述
 
 > **TaskLens｜单 Agent AI 浏览器测试与运行观测平台（Python / FastAPI / CDP / SQLite）**
-> 基于 `browser-use/browser-harness` 二次开发，构建“任务理解 → 页面观察 → 动作执行 → 结果校验 → 失败归因 → 有界重试 → 终态判定”的单 Agent 闭环；复用上游 daemon/CDP/helper 封装 Browser Adapter，使用 Pydantic v2 + SQLite 沉淀脱敏运行证据，并通过 FastAPI + Dashboard 展示失败步骤、断言结果、helper 耗时和任务回放，采用 fail-open 策略隔离观测故障。
+> 基于 `browser-harness` 与 CDP 构建浏览器操作层，形成“任务理解 → 页面观察 → 动作执行 → 结果校验 → 失败归因 → 有界重试 → 终态判定”的单 Agent 闭环；使用 Pydantic v2 + SQLite 沉淀脱敏运行证据，并通过 FastAPI + Dashboard 展示失败步骤、断言结果、helper 耗时和任务回放，采用 fail-open 策略隔离观测故障。
 
 ## 面试叙事主线
 
 ### 为什么不重新实现浏览器自动化？
 
-上游已经处理真实浏览器连接、CDP 会话、标签页管理和基础 helper。TaskLens 把二开重点放在单 Agent Runtime、业务结果校验和测试证据层，减少重复代码并明确上游同步边界。
+`browser-harness` 已经处理真实浏览器连接、CDP 会话、标签页管理和基础 helper。TaskLens 把个人开发重点放在单 Agent Runtime、业务结果校验和测试证据层，减少重复代码并明确依赖边界。
 
 ### 为什么只使用单 Agent？
 

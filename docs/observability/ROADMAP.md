@@ -4,8 +4,8 @@
 
 ## 阶段 0：仓库与边界（已完成）
 
-- Fork 官方 `browser-use/browser-harness`；
-- 保留 `upstream` 远端，个人仓库使用独立名称 `tasklens`；
+- 建立独立的 TaskLens 个人仓库，并引入 `browser-use/browser-harness` 作为浏览器执行基线；
+- 保留 `upstream` 远端用于同步开源依赖，个人仓库使用独立名称 `tasklens`；
 - 创建 `feat/observability-dashboard` 分支；
 - 冻结“本地观测台”方向；
 - 完成本目录中的 PRD、架构、需求和项目简介；
