@@ -1,4 +1,4 @@
-# HarnessScope
+# TaskLens
 
 AI 浏览器自动化运行观测与评估平台（设计阶段）
 
@@ -6,7 +6,7 @@ AI 浏览器自动化运行观测与评估平台（设计阶段）
 
 ## 项目简介
 
-HarnessScope 是基于 [browser-use/browser-harness](https://github.com/browser-use/browser-harness) 的个人二次开发项目，计划为 AI 浏览器任务增加本地优先的运行观测层：沉淀脱敏后的运行历史、复盘失败步骤、比较 helper 耗时，并通过只读 API 和响应式 Dashboard 展示证据。
+TaskLens 是基于 [browser-use/browser-harness](https://github.com/browser-use/browser-harness) 的个人二次开发项目，计划为 AI 浏览器任务增加本地优先的运行观测层：沉淀脱敏后的运行历史、复盘失败步骤、比较 helper 耗时，并通过只读 API 和响应式 Dashboard 展示证据。
 
 项目不重新实现 CDP 浏览器控制。核心价值是围绕成熟 Harness 做增量设计，并处理测试开发场景中容易被忽略的失败语义、敏感数据、兼容性和可验证性。
 
@@ -33,6 +33,7 @@ HarnessScope 是基于 [browser-use/browser-harness](https://github.com/browser-
 ## 设计文档
 
 - [设计入口](docs/observability/README.md)
+- [项目全景分析：上游能力、短板与二开路线](docs/observability/PROJECT_ANALYSIS.md)
 - [项目简介与简历边界](docs/observability/PROJECT_BRIEF.md)
 - [产品需求文档](docs/observability/PRD.md)
 - [架构设计](docs/observability/ARCHITECTURE.md)
@@ -53,7 +54,7 @@ browser-harness stdin script
                  只读 HTTP API
                          |
                          v
-              HarnessScope Dashboard
+               TaskLens Dashboard
 ```
 
 ## 开发边界

@@ -1,11 +1,11 @@
-# HarnessScope 九天开发路线图
+# TaskLens 九天开发路线图
 
 > 当前进度：**Day 1 设计文档完成；Day 2 之后尚未开始**。
 
 ## 阶段 0：仓库与边界（已完成）
 
 - Fork 官方 `browser-use/browser-harness`；
-- 保留 `upstream` 远端，个人仓库使用独立名称 `harness-scope`；
+- 保留 `upstream` 远端，个人仓库使用独立名称 `tasklens`；
 - 创建 `feat/observability-dashboard` 分支；
 - 冻结“本地观测台”方向；
 - 完成本目录中的 PRD、架构、需求和项目简介；
@@ -80,4 +80,3 @@
 ## 明确不做
 
 账号系统、云端多租户、复杂数据库、模型根因分析、跨机器实时协作和自动修复不进入本轮九天范围。
-

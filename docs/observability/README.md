@@ -1,12 +1,12 @@
-# HarnessScope 二开设计文档
+# TaskLens 二开设计文档
 
 > 当前状态：**仅完成开发前设计，尚未实现二开功能**。本文档是后续开发的约束与验收基线，不代表 Dashboard、API 或运行记录已经存在。
 
 ## 项目定位
 
-HarnessScope 是基于 [browser-use/browser-harness](https://github.com/browser-use/browser-harness) 的个人二次开发项目，目标是为 AI 浏览器自动化任务补齐“运行可观测、失败可复盘、性能可比较”的本地工作台。
+TaskLens 是基于 [browser-use/browser-harness](https://github.com/browser-use/browser-harness) 的个人二次开发项目，目标是为 AI 浏览器自动化任务补齐“运行可观测、失败可复盘、性能可比较”的本地工作台。
 
-- 个人仓库：`xiaoluo566/harness-scope`
+- 个人仓库：`xiaoluo566/tasklens`
 - 上游仓库：`browser-use/browser-harness`
 - 当前工作分支：`feat/observability-dashboard`
 - 当前阶段：设计冻结，暂不提交实现代码
@@ -19,11 +19,12 @@ HarnessScope 是基于 [browser-use/browser-harness](https://github.com/browser-
 2. helper 的耗时没有跨任务的历史比较；
 3. Agent 调试证据与测试开发的回归证据没有统一入口。
 
-HarnessScope 不重新实现浏览器控制，而是在原有执行链路旁路增加本地运行历史、只读 API 和 Dashboard 设计。
+TaskLens 不重新实现浏览器控制，而是在原有执行链路旁路增加本地运行历史、只读 API 和 Dashboard 设计。
 
 ## 文档索引
 
 - [PROJECT_BRIEF.md](PROJECT_BRIEF.md)：项目简介、简历表述和面试叙事
+- [PROJECT_ANALYSIS.md](PROJECT_ANALYSIS.md)：上游项目全景、短板和二开路线
 - [PRD.md](PRD.md)：问题、用户、方案、指标和边界
 - [ARCHITECTURE.md](ARCHITECTURE.md)：拟议模块、数据流、安全和部署
 - [REQUIREMENTS.md](REQUIREMENTS.md)：可验收需求、优先级和测试契约
@@ -46,4 +47,3 @@ HarnessScope 不重新实现浏览器控制，而是在原有执行链路旁路�
 - **证据优先**：每个指标都能回溯到一次运行记录和 helper 步骤。
 - **最小依赖**：首版优先使用 Python 标准库和单文件前端，避免为展示层引入大型构建链。
 - **可撤回**：二开功能应可独立关闭、删除或回退，不改变上游核心 API。
-

@@ -1,8 +1,8 @@
-# HarnessScope 项目简介（简历与面试用）
+# TaskLens 项目简介（简历与面试用）
 
 ## 一句话定位
 
-HarnessScope 是基于开源 `browser-harness` 的个人二次开发设计：面向 AI 浏览器自动化任务，规划一个本地优先的运行观测与失败复盘工作台。
+TaskLens 是基于开源 `browser-harness` 的个人二次开发设计：面向 AI 浏览器自动化任务，规划一个本地优先的运行观测与失败复盘工作台。
 
 ## 当前真实状态
 
@@ -16,7 +16,7 @@ Python、CDP 浏览器自动化、CLI 生命周期、JSONL、HTTP API、响应�
 
 ## 建议的简历描述（完成 P0 后再使用）
 
-> HarnessScope｜AI 浏览器自动化运行观测与评估平台（Python / CDP / HTTP / Playwright）
+> TaskLens｜AI 浏览器自动化运行观测与评估平台（Python / CDP / HTTP / Playwright）
 >
 > 基于 browser-use/browser-harness 进行二次开发，设计并实现本地运行记录、敏感字段脱敏、失败步骤复盘和 helper 耗时分析；通过只读 API 与响应式 Dashboard 统一展示 Agent 浏览器任务证据，并以 fail-open 旁路策略保证观测异常不影响原任务执行。
 
@@ -40,4 +40,3 @@ Python、CDP 浏览器自动化、CLI 生命周期、JSONL、HTTP API、响应�
 - Dashboard 桌面和 375px 截图；
 - 测试报告、覆盖率报告和安全检查记录；
 - 与上游基线的 diff 说明。
-
