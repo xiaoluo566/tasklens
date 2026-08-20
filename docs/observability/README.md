@@ -19,11 +19,13 @@ TaskLens 是基于 [browser-use/browser-harness](https://github.com/browser-use/
 2. helper 的耗时没有跨任务的历史比较；
 3. Agent 调试证据与测试开发的回归证据没有统一入口。
 
-TaskLens 不重新实现浏览器控制，而是在原有执行链路旁路增加本地运行历史、只读 API 和 Dashboard 设计。
+TaskLens 不重新实现浏览器控制，而是在原有执行链路上增加单 Agent Runtime、业务断言、本地运行历史、FastAPI 和 Dashboard。
 
 ## 文档索引
 
 - [PROJECT_BRIEF.md](PROJECT_BRIEF.md)：项目简介、简历表述和面试叙事
+- [RESUME_DRAFT.md](RESUME_DRAFT.md)：可直接投递的项目成稿、面试口径和兑现清单
+- [SECONDARY_DEVELOPMENT_SPEC.md](SECONDARY_DEVELOPMENT_SPEC.md)：单 Agent 能力、接口、约束和证据映射
 - [PROJECT_ANALYSIS.md](PROJECT_ANALYSIS.md)：上游项目全景、短板和二开路线
 - [PRD.md](PRD.md)：问题、用户、方案、指标和边界
 - [ARCHITECTURE.md](ARCHITECTURE.md)：拟议模块、数据流、安全和部署
@@ -35,6 +37,7 @@ TaskLens 不重新实现浏览器控制，而是在原有执行链路旁路增�
 以下命令是设计目标，当前版本尚未提供：
 
 ```powershell
+./browser-harness task --goal "完成结算并确认订单状态"
 ./browser-harness dashboard
 ```
 
@@ -45,5 +48,5 @@ TaskLens 不重新实现浏览器控制，而是在原有执行链路旁路增�
 - **旁路增强**：观测失败不能改变原 Harness 的脚本输出和退出码。
 - **本地优先**：默认不上传任务内容，不引入账号、多租户或云端数据库。
 - **证据优先**：每个指标都能回溯到一次运行记录和 helper 步骤。
-- **最小依赖**：首版优先使用 Python 标准库和单文件前端，避免为展示层引入大型构建链。
+- **最小依赖**：首版使用 FastAPI、Pydantic v2 和 SQLite，避免引入云端数据库和大型前端构建链。
 - **可撤回**：二开功能应可独立关闭、删除或回退，不改变上游核心 API。

@@ -2,41 +2,57 @@
 
 ## 一句话定位
 
-TaskLens 是基于开源 `browser-harness` 的个人二次开发设计：面向 AI 浏览器自动化任务，规划一个本地优先的运行观测与失败复盘工作台。
+TaskLens 是基于开源 `browser-use/browser-harness` 二次开发的单 Agent AI 浏览器测试与运行观测平台：让 Agent 在真实浏览器中执行复杂网页任务，并留下可验证、可脱敏、可回放的测试证据。
 
-## 当前真实状态
+## 项目介绍
 
-- 已完成：Fork、克隆、本地分支、项目命名方案、开发前 PRD/架构/需求/路线图；
-- 未完成：运行记录模块、HTTP API、前端页面、Docker 部署和线上演示；
-- 因此当前简历只能写“项目设计/开发中”，不能写成“已实现 Dashboard”或虚构性能指标。
+平台以自然语言目标和结构化 `TaskSpec` 为入口，由单 Agent Runtime 负责页面观察、动作选择、Browser Adapter 调用、业务断言和有界重试；运行过程通过 Pydantic v2 建模并保存到 SQLite，FastAPI 提供任务启动、统计、筛选和详情接口，Dashboard 展示步骤状态、失败归因、断言结果、耗时和回放信息。
 
-## 计划使用的技术关键词
+## 技术栈
 
-Python、CDP 浏览器自动化、CLI 生命周期、JSONL、HTTP API、响应式前端、Playwright E2E、Docker、脱敏、故障降级、可观测性。
+Python 3.11+、FastAPI、Pydantic v2、CDP、WebSocket、SQLite、Pytest、Playwright、Ruff、Pyright、Docker。
 
-## 建议的简历描述（完成 P0 后再使用）
+## 核心模块
 
-> TaskLens｜AI 浏览器自动化运行观测与评估平台（Python / CDP / HTTP / Playwright）
->
-> 基于 browser-use/browser-harness 进行二次开发，设计并实现本地运行记录、敏感字段脱敏、失败步骤复盘和 helper 耗时分析；通过只读 API 与响应式 Dashboard 统一展示 Agent 浏览器任务证据，并以 fail-open 旁路策略保证观测异常不影响原任务执行。
+| 模块 | 作用 |
+| --- | --- |
+| `agent_runtime.py` | 单 Agent 状态机：观察、动作、校验、重试和终态判定 |
+| `browser_adapter.py` | 复用上游 daemon/CDP/helper，提供统一浏览器动作接口 |
+| `observability.py` | 脱敏、长度限制、RunRecord/StepRecord/AssertionRecord 构建 |
+| `storage.py` | SQLite schema、repository、统计和查询 |
+| `dashboard.py` | FastAPI 路由、统一错误 envelope、页面和步骤回放 |
 
-上面这段只有在 P0 代码、测试和真实浏览器验证完成后使用；开发中阶段可改为：
+## 项目亮点
 
-> 基于 browser-use/browser-harness 完成 AI 浏览器任务观测平台的 PRD、数据契约和安全架构设计，规划本地运行历史、失败复盘与 helper 性能分析模块。
+1. **单 Agent 闭环**：在一个运行上下文中完成观察—行动—校验，设置最大步数、总超时和幂等重试预算，控制 Agent 循环风险。
+2. **结果而非只看动作**：helper 调用成功不直接等价于业务成功，文本、元素状态和结构化结果断言独立记录。
+3. **证据可追溯**：每次运行拥有 `run_id`，每个步骤记录观察摘要、动作、耗时、断言和失败归因，可从总览下钻到首次偏离步骤。
+4. **安全与降级**：URL 去除 query/fragment，Token/Cookie/Authorization 等字段脱敏后再截断；存储或观测故障不改变主任务退出码。
+5. **增量二开**：不重写上游 CDP 控制和浏览器生命周期，通过 Browser Adapter 隔离上游变化，保留同步和回退空间。
+
+## 简历描述
+
+> **TaskLens｜单 Agent AI 浏览器测试与运行观测平台（Python / FastAPI / CDP / SQLite）**
+> 基于 `browser-use/browser-harness` 二次开发，构建“任务理解 → 页面观察 → 动作执行 → 结果校验 → 失败归因 → 有界重试 → 终态判定”的单 Agent 闭环；复用上游 daemon/CDP/helper 封装 Browser Adapter，使用 Pydantic v2 + SQLite 沉淀脱敏运行证据，并通过 FastAPI + Dashboard 展示失败步骤、断言结果、helper 耗时和任务回放，采用 fail-open 策略隔离观测故障。
 
 ## 面试叙事主线
 
-1. **为什么不重新做浏览器自动化？** 上游已经解决连接和操作，个人项目选择补齐运行证据层，体现增量架构判断。
-2. **为什么 JSONL 而不是数据库？** 首版目标是单机、可检查、低依赖；记录上限和后续迁移边界已在架构中定义。
-3. **如何避免泄露任务信息？** URL 去 query/fragment，敏感键脱敏，输出限长，默认回环监听，不上传原文。
-4. **如何保证不影响主流程？** 观测写入是旁路 best-effort，异常被吸收，退出码由原 Harness 决定。
-5. **如何证明质量？** TDD 覆盖数据层/API，Playwright 验证关键页面，定义了 80% 覆盖率和全量回归门槛。
+### 为什么不重新实现浏览器自动化？
 
-## 作品集证据清单（未来补齐）
+上游已经处理真实浏览器连接、CDP 会话、标签页管理和基础 helper。TaskLens 把二开重点放在单 Agent Runtime、业务结果校验和测试证据层，减少重复代码并明确上游同步边界。
 
-- 架构图和数据流图；
-- 一条成功运行与一条失败运行的脱敏 JSONL；
-- API 请求/响应示例；
-- Dashboard 桌面和 375px 截图；
-- 测试报告、覆盖率报告和安全检查记录；
-- 与上游基线的 diff 说明。
+### 为什么只使用单 Agent？
+
+单 Agent 让观察、动作、校验、重试和证据写入共享同一状态上下文，更适合九天内把执行闭环做深；多 Agent 通信和调度不是本项目的必要复杂度。
+
+### 为什么 SQLite？
+
+项目首版面向单机演示和可复现测试，SQLite 足以支撑运行、步骤、断言和统计查询；通过 repository 接口保留后续迁移到 PostgreSQL 的空间。
+
+### 如何保证 Agent 真的完成业务？
+
+把“动作成功”和“业务结果正确”分开：动作只记录 helper 执行结果，断言模块再检查文本、元素状态或结构化结果，最终状态由断言和任务契约共同决定。
+
+## 简历量化字段
+
+以下数字只能填入真实测量值：测试数量、覆盖率、任务步数上限、平均响应时间、Docker 启动时间、真实浏览器成功/失败样例数量。
