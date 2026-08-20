@@ -12,13 +12,13 @@
 
 **项目介绍：** TaskLens 是一个面向复杂网页流程的单 Agent AI 浏览器测试平台，支持自然语言任务执行、结果校验、失败归因与步骤回放，将“任务理解 → 页面观察 → 动作执行 → 结果验证 → 终态判定”的黑盒过程转化为可观察、可解释、可追溯的测试证据。
 
-- 围绕 `browser-harness` 的 stdin 执行模型与 helper trace，搭建单 Agent Runtime 状态链，引入 `TaskSpec`、最大步数、任务级超时和幂等重试约束，在 Observation→Action→Assertion 循环中产出 `AgentResult`，解决自然语言任务执行状态分散、异常循环和终止条件不清的问题。
+- 围绕真实浏览器任务的单 Agent 执行链路，搭建从 `TaskSpec`、Observation、Action 到 Assertion、`AgentResult` 的状态链，引入最大步数、任务级超时和幂等重试约束，将自然语言目标收敛为可控执行流程，解决 Agent 状态分散、异常循环和终止条件不清的问题。
 
-- 封装 daemon 的 CDP WebSocket、Tab/session 管理与 helper 能力，设计统一的 Browser Adapter、动作协议和错误映射层，将 Agent 决策与浏览器生命周期解耦，解决环境差异导致的接口不一致、连接故障难定位和底层依赖难替换的问题。
+- 封装 CDP WebSocket、Tab/session 管理与浏览器 helper 能力，设计统一的 Browser Adapter、动作协议和错误映射层，将 Agent 决策与浏览器生命周期解耦，解决环境差异导致的接口不一致、连接故障难定位和底层依赖难替换的问题。
 
 - 引入文本、元素状态和结构化结果三类断言，结合 helper trace、DOM/状态快照、首次偏离步骤与 `failure_kind`，建立动作结果、页面证据和业务终态的分层判定链，避免将 helper 成功误判为业务成功，并支持模型、环境和动作失败归因。
 
-- 通过 `run.py` helper trace、recorder 事件与本地优先约束，建立 Pydantic v2 + SQLite 的任务—步骤—断言证据链，配套 FastAPI 查询、敏感字段脱敏、长度限制和 fail-open 降级，解决日志分散、历史不可检索和观测故障影响主任务的问题；使用 Pytest、Pyright 与 Playwright 验证状态流转、接口契约和真实浏览器流程。
+- 通过执行追踪、录制事件与本地优先约束，建立 Pydantic v2 + SQLite 的任务—步骤—断言证据链，配套 FastAPI 查询、敏感字段脱敏、长度限制和 fail-open 降级，解决日志分散、历史不可检索和观测故障影响主任务的问题；使用 Pytest、Pyright 与 Playwright 验证状态流转、接口契约和真实浏览器流程。
 
 ## 精简版
 
