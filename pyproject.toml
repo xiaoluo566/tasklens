@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "browser-harness"
 version = "0.1.9"
-description = "The simplest, thinnest, and most powerful harness to control your real browser with your agent."
+description = "HarnessScope design fork for AI browser task observability and evaluation."
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
@@ -33,8 +33,8 @@ browser-harness = "browser_harness.run:main"
 
 [project.urls]
 Homepage = "https://github.com/browser-use/browser-harness"
-Repository = "https://github.com/browser-use/browser-harness"
-Issues = "https://github.com/browser-use/browser-harness/issues"
+Repository = "https://github.com/xiaoluo566/harness-scope"
+Issues = "https://github.com/xiaoluo566/harness-scope/issues"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
