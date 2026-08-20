@@ -6,6 +6,15 @@
 
 TaskLens 基于 `browser-harness` 与 CDP 构建本地优先的单 Agent AI 浏览器测试能力：用户提交自然语言目标后，由一个 Agent Runtime 循环完成页面观察、动作选择、helper 执行、结果校验和有界重试；测试开发者可以在不改变原任务退出码的前提下，查看脱敏后的运行摘要、helper 步骤、失败阶段和耗时，并通过页面进行筛选和复盘。开源依赖提供浏览器连接与 CDP 控制，TaskLens 负责单 Agent 执行闭环和测试证据层。
 
+### Existing foundation and extension boundary
+
+| 开源基础 | TaskLens 实现 | 解决的问题 |
+| --- | --- | --- |
+| `run.py` 的 stdin 执行和 helper trace | `TaskSpec`、Agent Runtime、步骤预算和终态模型 | 任务状态分散、循环和终止条件不可控 |
+| daemon 的 CDP WebSocket、Tab/session 和 helper | Browser Adapter、统一动作协议和错误映射 | Agent 与浏览器生命周期耦合、连接故障难定位 |
+| `recorder.py` 的事件/截图上下文和页面 DOM 状态 | 断言、证据引用、首次偏离步骤和 `failure_kind` | 动作成功与业务正确混淆、失败无法归因 |
+| 本地配置目录和过程输出 | Pydantic 模型、SQLite repository、FastAPI 查询与脱敏策略 | 日志分散、历史不可检索、敏感信息和观测故障风险 |
+
 ## CONSTRAINTS
 
 ### 固定规则

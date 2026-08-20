@@ -12,13 +12,13 @@
 
 **项目介绍：** TaskLens 是一个面向复杂网页流程的单 Agent AI 浏览器测试平台，支持自然语言任务执行、结果校验、失败归因与步骤回放，将“任务理解 → 页面观察 → 动作执行 → 结果验证 → 终态判定”的黑盒过程转化为可观察、可解释、可追溯的测试证据。
 
-- 围绕复杂网页任务的单 Agent 执行闭环，搭建从 `TaskSpec`、页面 Observation 到 Action、Assertion、`AgentResult` 的可追溯状态链，将自然语言目标转化为受最大步数、任务级超时和幂等重试约束的浏览器动作，解决 Agent 执行状态分散、终止条件不清的问题。
+- 基于 `browser-harness` 的 stdin 执行模型与 helper trace，设计并实现单 Agent Runtime，以 `TaskSpec` 约束目标、动作、最大步数、任务级超时和幂等重试，在 Observation→Action→Assertion 循环中产出 `AgentResult`，解决自然语言任务执行状态不可控、异常循环和终止条件不清的问题。
 
-- 基于 `browser-harness` 与 CDP 协议抽象 Browser Adapter，统一浏览器会话、页面状态提取及点击、输入、滚动、等待、截图等动作接口，将 Agent 决策与底层浏览器生命周期解耦，并区分环境、连接、动作与业务断言失败，提升执行链路的可替换性与故障隔离能力。
+- 基于 daemon 的 CDP WebSocket、Tab/session 管理和 helper 能力，设计并实现 Browser Adapter，统一页面观察、动作调用与错误映射，隔离 Agent 决策和浏览器生命周期，解决不同浏览器环境下接口不一致、连接故障难定位和底层依赖难替换的问题。
 
-- 引入文本、元素状态和结构化结果断言，构建“动作执行结果—页面状态证据—业务终态判定”的分层验证机制，将 helper 调用成功与业务结果正确分开判定，并通过首次偏离步骤和失败类型归因定位环境异常、模型决策错误与页面执行失败。
+- 基于 helper trace 与页面 DOM/状态快照，设计并实现文本、元素状态、结构化结果三类断言及证据模型，记录首次偏离步骤和 `failure_kind`，解决“helper 调用成功但业务结果错误”以及模型、环境、动作失败难区分的问题。
 
-- 通过 Pydantic v2、SQLite 与 FastAPI 建立从任务、步骤、断言到错误摘要的运行证据链，配合字段脱敏、长度限制和 fail-open 降级策略保证观测异常不影响主任务；使用 Pytest、Ruff、Pyright 与 Playwright 覆盖状态流转、接口契约、异常分支和真实浏览器关键流程。
+- 基于 `run.py` helper trace、recorder 事件和本地优先约束，设计并实现 Pydantic v2 + SQLite 运行证据层及 FastAPI 查询接口，加入敏感字段脱敏、长度限制和 fail-open 降级，解决日志分散、历史不可检索和观测故障影响主任务的问题；通过 Pytest、Pyright 与 Playwright 验证状态流转、接口契约和真实浏览器流程。
 
 ## 精简版
 
