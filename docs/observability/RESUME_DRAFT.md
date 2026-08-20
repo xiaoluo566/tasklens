@@ -12,21 +12,21 @@
 
 **项目介绍：** TaskLens 是一个面向复杂网页流程的单 Agent AI 浏览器测试平台，支持自然语言任务执行、结果校验、失败归因与步骤回放，将“任务理解 → 页面观察 → 动作执行 → 结果验证 → 终态判定”的黑盒过程转化为可观察、可解释、可追溯的测试证据。
 
-- 基于 `browser-harness` 的 stdin 执行模型与 helper trace，设计并实现单 Agent Runtime，以 `TaskSpec` 约束目标、动作、最大步数、任务级超时和幂等重试，在 Observation→Action→Assertion 循环中产出 `AgentResult`，解决自然语言任务执行状态不可控、异常循环和终止条件不清的问题。
+- 围绕 `browser-harness` 的 stdin 执行模型与 helper trace，搭建单 Agent Runtime 状态链，引入 `TaskSpec`、最大步数、任务级超时和幂等重试约束，在 Observation→Action→Assertion 循环中产出 `AgentResult`，解决自然语言任务执行状态分散、异常循环和终止条件不清的问题。
 
-- 基于 daemon 的 CDP WebSocket、Tab/session 管理和 helper 能力，设计并实现 Browser Adapter，统一页面观察、动作调用与错误映射，隔离 Agent 决策和浏览器生命周期，解决不同浏览器环境下接口不一致、连接故障难定位和底层依赖难替换的问题。
+- 封装 daemon 的 CDP WebSocket、Tab/session 管理与 helper 能力，设计统一的 Browser Adapter、动作协议和错误映射层，将 Agent 决策与浏览器生命周期解耦，解决环境差异导致的接口不一致、连接故障难定位和底层依赖难替换的问题。
 
-- 基于 helper trace 与页面 DOM/状态快照，设计并实现文本、元素状态、结构化结果三类断言及证据模型，记录首次偏离步骤和 `failure_kind`，解决“helper 调用成功但业务结果错误”以及模型、环境、动作失败难区分的问题。
+- 引入文本、元素状态和结构化结果三类断言，结合 helper trace、DOM/状态快照、首次偏离步骤与 `failure_kind`，建立动作结果、页面证据和业务终态的分层判定链，避免将 helper 成功误判为业务成功，并支持模型、环境和动作失败归因。
 
-- 基于 `run.py` helper trace、recorder 事件和本地优先约束，设计并实现 Pydantic v2 + SQLite 运行证据层及 FastAPI 查询接口，加入敏感字段脱敏、长度限制和 fail-open 降级，解决日志分散、历史不可检索和观测故障影响主任务的问题；通过 Pytest、Pyright 与 Playwright 验证状态流转、接口契约和真实浏览器流程。
+- 通过 `run.py` helper trace、recorder 事件与本地优先约束，建立 Pydantic v2 + SQLite 的任务—步骤—断言证据链，配套 FastAPI 查询、敏感字段脱敏、长度限制和 fail-open 降级，解决日志分散、历史不可检索和观测故障影响主任务的问题；使用 Pytest、Pyright 与 Playwright 验证状态流转、接口契约和真实浏览器流程。
 
 ## 精简版
 
 简历空间不足时保留下面三条：
 
-- 构建单 Agent Runtime、Browser Adapter、Evidence Store 与 Dashboard，形成任务理解、页面观察、动作执行、结果校验和失败复盘闭环。
-- 基于 `browser-harness` 与 CDP 封装浏览器会话、页面状态及点击/输入/等待等动作能力，通过任务超时、最大步数、幂等重试和业务断言控制执行风险。
-- 使用 Pydantic v2 + SQLite 沉淀脱敏运行证据，基于 FastAPI + Dashboard 展示运行历史、失败步骤和耗时，并通过 Pytest/Playwright 验证关键链路。
+- 围绕单 Agent Runtime、Browser Adapter、Evidence Store 与 Dashboard，形成任务理解、页面观察、动作执行、结果校验和失败复盘闭环。
+- 封装 `browser-harness` 与 CDP 的浏览器会话、页面状态及点击/输入/等待等动作能力，通过任务超时、最大步数、幂等重试和业务断言控制执行风险。
+- 使用 Pydantic v2 + SQLite 沉淀脱敏运行证据，通过 FastAPI + Dashboard 展示运行历史、失败步骤和耗时，并以 Pytest/Playwright 验证关键链路。
 
 ## 与开发文档的对应关系
 
