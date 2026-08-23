@@ -1,6 +1,6 @@
 # TaskLens 九天开发路线图（单 Agent 版本）
 
-> 当前进度：**Day 1 设计文档完成；Day 2 之后尚未开始**。
+> 当前进度：**P0 核心实现完成；真实 Chrome/CDP、Docker 和交付截图待验证**。
 
 ## 阶段 0：仓库与边界（已完成）
 
@@ -11,61 +11,57 @@
 - 完成本目录中的 PRD、架构、需求和项目简介；
 - 不在设计阶段提交功能实现代码。
 
-## Day 2：单 Agent 契约与测试设计
+## Day 2：单 Agent 契约与测试设计（已完成）
 
 - 先写 `TaskSpec`、断言 DSL、Runtime 状态机、脱敏规则和边界测试；
 - 明确观察、动作、校验、重试、成功、SystemExit、异常和超时生命周期；
 - 固定模型 Provider 接口，提供确定性 Fake Provider；
-- 交付：单 Agent 测试计划、数据契约评审记录。
+- 交付：`tasklens_domain.py`、确定性 Provider 契约和运行状态测试。
 
-## Day 3：单 Agent Runtime 与本地存储 P0
+## Day 3：单 Agent Runtime 与本地存储 P0（已完成）
 
 - 实现 `agent_runtime.py` 的观察—动作—校验循环和有界重试；
 - 实现 Pydantic 模型、SQLite schema 和 repository；
 - 完成运行/步骤/断言追加、读取、过滤、汇总和限长；
 - 单元测试覆盖率达到 80% 以上；
-- 交付：可独立测试的 Runtime 与存储模块。
+- 交付：Runtime、SQLite repository、脱敏证据和 fail-open 测试。
 
-## Day 4：Browser Adapter 与运行链路接入
+## Day 4：Browser Adapter 与运行链路接入（P0 已完成）
 
 - 封装 daemon、Tab、DOM 和 helper 为 Browser Adapter；
-- 以最小 diff 接入 `run.py`；
+- 以独立 `tasklens_cli.py` 和组合层接入，不修改上游 `run.py`；
 - 保证观测失败不影响原脚本；
 - 运行上游测试并记录基线差异；
-- 交付：成功/失败/异常/断言失败记录闭环。
+- 交付：成功/失败/异常/断言失败记录闭环；真实 Chrome 冒烟待验证。
 
-## Day 5：FastAPI 服务层
+## Day 5：FastAPI 服务层（已完成）
 
 - 实现任务启动、health、summary、runs、detail；
 - 统一 envelope、参数校验和错误码；
 - 完成 API 集成测试；
-- 交付：本地 FastAPI 契约与示例响应。
+- 交付：本地 FastAPI 契约、统一 envelope 和集成测试。
 
-## Day 6：Dashboard 首屏
+## Day 6：Dashboard 首屏（已完成）
 
 - 实现自包含页面、总览和运行列表；
 - 先完成空状态、错误状态和加载状态；
 - 保持无重型前端依赖；
-- 交付：桌面端 P0 页面。
+- 交付：自包含桌面端 P0 页面；窄屏实测待完成。
 
-## Day 7：详情回放与真实验证
+## Day 7：详情回放与真实验证（部分完成）
 
 - 加入失败详情、断言结果、步骤耗时、筛选和步骤回放；
-- 使用真实浏览器完成桌面/375px 冒烟；
-- 保存截图和测试日志作为项目证据；
-- 交付：E2E 冒烟证据。
+- 已完成运行详情、断言、步骤耗时排序和 Playwright 契约覆盖；真实浏览器桌面/375px 冒烟与截图待在目标环境执行。
 
-## Day 8：安全与工程化
+## Day 8：安全与工程化（进行中）
 
 - 做敏感字段审查、输入校验和依赖审查；
-- 完成 README、CHANGELOG、Docker 可选说明；
-- 做覆盖率、静态检查和全量回归；
-- 交付：可发布候选版本。
+- 已完成 README、Provider 安全边界、静态检查和 TaskLens 回归；Docker、真实浏览器与真实模型仍待目标环境验证。全量基线当前为 257 通过、1 个上游 Windows checkout 资源链接失败。
 
-## Day 9：作品集交付
+## Day 9：作品集交付（待完成）
 
 - 整理架构决策、演示脚本和简历项目描述；
-- 使用 Conventional Commits 提交；
+- 使用 Conventional Commits 提交并推送；
 - 推送个人仓库并确认 README、截图和文档链接；
 - 交付：可面试演示的 P0 版本。
 
@@ -73,11 +69,11 @@
 
 | 里程碑 | 必须满足 | 回退点 |
 | --- | --- | --- |
-| M1 设计冻结 | PRD/架构/需求无矛盾 | 只保留文档，不写代码 |
-| M2 数据层 | 脱敏和存储测试通过 | 不接入 `run.py` |
-| M3 API | API 错误语义稳定 | 页面暂不开发 |
-| M4 页面 | E2E 冒烟通过 | 保留 API，关闭页面入口 |
-| M5 交付 | 全量回归和安全检查通过 | 回退到最近稳定 tag |
+| M1 设计冻结 | PRD/架构/需求无矛盾 | 已达成 |
+| M2 数据层 | 脱敏和存储测试通过 | 已达成 |
+| M3 API | API 错误语义稳定 | 已达成 |
+| M4 页面 | 契约测试通过；真实浏览器冒烟待补 | 暂保留 API/页面 |
+| M5 交付 | 全量回归、真实环境和安全检查通过 | 回退到最近稳定 tag |
 
 ## 明确不做
 

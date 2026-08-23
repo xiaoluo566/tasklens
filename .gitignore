@@ -1,6 +1,11 @@
 __pycache__/
 *.pyc
 *.log
+.pytest_cache/
+.ruff_cache/
+.venv/
+.coverage
+htmlcov/
 .env
 uv.lock
 *.egg-info/
@@ -9,3 +14,5 @@ build/
 dist/
 .idea/
 .claude/
+.playwright-cli/
+output/playwright/

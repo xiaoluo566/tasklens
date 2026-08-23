@@ -14,11 +14,11 @@
 
 - 围绕真实浏览器任务的单 Agent 执行链路，搭建从 `TaskSpec`、Observation、Action 到 Assertion、`AgentResult` 的状态链，引入最大步数、任务级超时和幂等重试约束，将自然语言目标收敛为可控执行流程，解决 Agent 状态分散、异常循环和终止条件不清的问题。
 
-- 封装 CDP WebSocket、Tab/session 管理与浏览器 helper 能力，设计统一的 Browser Adapter、动作协议和错误映射层，将 Agent 决策与浏览器生命周期解耦，解决环境差异导致的接口不一致、连接故障难定位和底层依赖难替换的问题。
+- 基于 `browser-harness` 的 CDP/session 与浏览器 helper 能力，设计统一的 Browser Adapter、动作协议和错误映射层，将 Agent 决策与底层浏览器生命周期解耦，解决环境差异导致的接口不一致、连接故障难定位和依赖难替换的问题。
 
 - 引入文本、元素状态和结构化结果三类断言，结合 helper trace、DOM/状态快照、首次偏离步骤与 `failure_kind`，建立动作结果、页面证据和业务终态的分层判定链，避免将 helper 成功误判为业务成功，并支持模型、环境和动作失败归因。
 
-- 通过执行追踪、录制事件与本地优先约束，建立 Pydantic v2 + SQLite 的任务—步骤—断言证据链，配套 FastAPI 查询、敏感字段脱敏、长度限制和 fail-open 降级，解决日志分散、历史不可检索和观测故障影响主任务的问题；使用 Pytest、Pyright 与 Playwright 验证状态流转、接口契约和真实浏览器流程。
+- 通过执行追踪与本地优先约束，建立 Pydantic v2 + SQLite 的任务—步骤—断言证据链，配套 FastAPI 查询、敏感字段脱敏、长度限制和 fail-open 降级，解决日志分散、历史不可检索和观测故障影响主任务的问题；已用 Pytest/Pyright 验证核心链路，Playwright 真实浏览器流程待目标环境补证。
 
 ## 精简版
 

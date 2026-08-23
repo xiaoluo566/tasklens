@@ -17,6 +17,8 @@ Python 3.11+、FastAPI、Pydantic v2、CDP、WebSocket、SQLite、Pytest、Playw
 | 模块 | 作用 |
 | --- | --- |
 | `agent_runtime.py` | 单 Agent 状态机：观察、动作、校验、重试和终态判定 |
+| `model_provider.py` | 确定性 Demo 与 OpenAI-compatible Provider，限制模型输出为结构化动作 |
+| `tasklens_runtime.py` | 组合 Browser Adapter、Provider 与 Runtime，提供 CLI/Dashboard 默认入口 |
 | `browser_adapter.py` | 复用上游 daemon/CDP/helper，提供统一浏览器动作接口 |
 | `observability.py` | 脱敏、长度限制、RunRecord/StepRecord/AssertionRecord 构建 |
 | `storage.py` | SQLite schema、repository、统计和查询 |
@@ -33,7 +35,7 @@ Python 3.11+、FastAPI、Pydantic v2、CDP、WebSocket、SQLite、Pytest、Playw
 ## 简历描述
 
 > **TaskLens｜单 Agent AI 浏览器测试与运行观测平台（Python / FastAPI / CDP / SQLite）**
-> 基于 `browser-harness` 与 CDP 构建浏览器操作层，形成“任务理解 → 页面观察 → 动作执行 → 结果校验 → 失败归因 → 有界重试 → 终态判定”的单 Agent 闭环；使用 Pydantic v2 + SQLite 沉淀脱敏运行证据，并通过 FastAPI + Dashboard 展示失败步骤、断言结果、helper 耗时和任务回放，采用 fail-open 策略隔离观测故障。
+> 基于 `browser-harness` 与 CDP 构建浏览器操作层，形成“任务理解 → 页面观察 → 动作执行 → 结果校验 → 失败归因 → 有界重试 → 终态判定”的单 Agent 闭环；使用 Pydantic v2 + SQLite 沉淀脱敏运行证据，并通过 FastAPI + Dashboard 展示失败步骤、断言结果、helper 耗时和任务回放，采用 fail-open 策略隔离观测故障。模型接入通过可替换 Provider 隔离，提供零网络 Demo 模式和 OpenAI-compatible 模式。
 
 ## 面试叙事主线
 

@@ -1,6 +1,6 @@
 # TaskLens 项目开发能力规格
 
-> 这是简历项目的开发交接文档。它把产品目标、工程约束、模块接口和验收证据固定下来，供后续编码、测试和面试演示使用。执行架构冻结为单 Agent；当前仅完成规格设计，文中的“计划/拟议”需要在后续开发中兑现。
+> 这是简历项目的开发交接文档。它把产品目标、工程约束、模块接口和验收证据固定下来，供编码、测试和面试演示使用。执行架构冻结为单 Agent；P0 核心实现已兑现，真实浏览器和交付环境证据仍需补齐。
 
 ## CAPABILITY
 
@@ -49,8 +49,10 @@ TaskLens 基于 `browser-harness` 与 CDP 构建本地优先的单 Agent AI 浏�
 
 | 组件 | 计划职责 | 明确不负责 |
 | --- | --- | --- |
-| `src/browser_harness/run.py` | 捕获开始/结束、已有 helper trace 和退出状态 | 存储实现、HTML 生成 |
+| `src/browser_harness/run.py` | 保持上游 stdin 执行、已有 helper trace 和退出状态 | TaskLens 存储实现、HTML 生成 |
 | `src/browser_harness/agent_runtime.py` | 单 Agent 状态机、观察/动作/校验循环、步骤预算和有界重试 | 多 Agent 编排、浏览器底层连接 |
+| `src/browser_harness/model_provider.py` | Demo 与 OpenAI-compatible 动作 Provider、输出校验和错误分类 | 浏览器控制和证据持久化 |
+| `src/browser_harness/tasklens_runtime.py` | 默认组合 Browser Adapter、Provider 和 Runtime | 任务业务规则和历史查询 |
 | `src/browser_harness/browser_adapter.py` | 封装会话、页面观察和 helper 动作，统一错误映射 | 模型决策、证据存储 |
 | `src/browser_harness/observability.py` | 脱敏、Pydantic 模型、证据构建 | 浏览器连接、监听端口 |
 | `src/browser_harness/storage.py` | SQLite 追加、读取、过滤、聚合和迁移边界 | 浏览器连接、页面展示 |
@@ -180,7 +182,7 @@ Runtime 输出 `AgentResult`，至少包含 `status`、`failure_kind`、`answer_
 | 编号 | 简历可用表述 | 当前证据 | P0 完成后的证据 |
 | --- | --- | --- | --- |
 | R1 | 设计单 Agent Runtime 状态机和有界重试 | 本规格、`PROJECT_ANALYSIS.md` | `agent_runtime.py`、状态机测试、执行日志 |
-| R2 | 抽象 Browser Adapter 并隔离浏览器生命周期 | `PROJECT_ANALYSIS.md`、`ARCHITECTURE.md` | Adapter 实现、`run.py` Hook diff、回归测试 |
+| R2 | 抽象 Browser Adapter 并隔离浏览器生命周期 | `PROJECT_ANALYSIS.md`、`ARCHITECTURE.md` | Adapter 实现、独立 TaskLens 入口和回归测试 |
 | R3 | 设计 `RunRecord`/`StepRecord`、断言和失败语义 | `ARCHITECTURE.md`、本规格 | 模型单测、样例 SQLite、API 响应 |
 | R4 | 设计脱敏、限长、回环监听和 fail-open | `PRD.md`、`REQUIREMENTS.md` | 脱敏测试、写入失败测试、安全审查 |
 | R5 | 规划只读 API 和 Dashboard | `PRD.md`、`REQUIREMENTS.md` | API 集成测试、页面截图、Playwright 报告 |
@@ -191,7 +193,7 @@ Runtime 输出 `AgentResult`，至少包含 `status`、`failure_kind`、`answer_
 1. **契约冻结**：先写 `TaskSpec`、断言、脱敏规则和 Runtime 状态机测试；不动浏览器控制逻辑。
 2. **单 Agent 闭环**：实现观察—动作—校验循环、步骤预算、总超时和幂等重试。
 3. **存储闭环**：实现 SQLite schema、仓储接口、运行/步骤追加、过滤、汇总和迁移边界。
-4. **执行接入**：在 `run.py` 的正常返回、`SystemExit` 和异常路径生成记录，并验证 fail-open。
+4. **执行接入**：通过独立 `tasklens_cli.py` 和组合层运行任务、生成记录并验证 fail-open；上游 `run.py` 保持原有入口和生命周期不变。
 5. **API 闭环**：实现 health、summary、runs、detail、任务启动和统一错误 envelope。
 6. **页面闭环**：实现空状态、运行列表、失败详情、耗时排序、步骤回放和窄屏布局。
 7. **验证交付**：运行开源基线回归、覆盖率、Ruff、Pyright、Docker 启动和真实浏览器 E2E，保存可公开的脱敏证据。
@@ -206,4 +208,4 @@ Runtime 输出 `AgentResult`，至少包含 `status`、`failure_kind`、`answer_
 
 ## HANDOFF
 
-当前能力已达到“可直接进入实现”的条件，前提是先确认模型适配器、断言 DSL 和存储上限。下一步按 `ROADMAP.md` 执行 TDD：先补单 Agent Runtime 测试，再实现 `agent_runtime.py`、证据存储、`run.py` 接入、API 和页面。完成代码与验证后，直接使用 `RESUME_DRAFT.md` 的项目成稿。
+当前 P0 能力已进入可演示状态：可用 `tasklens task --demo` 和 `tasklens dashboard --demo` 验证零网络闭环；OpenAI-compatible Provider、真实 Chrome/CDP 和 Docker 仍需按 `DEMO_RUNBOOK.md` 完成环境验证。继续开发时先保留现有契约和测试，再进入 Replay/Diff、批量回归等 P1/P2 范围。

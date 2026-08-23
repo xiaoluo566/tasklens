@@ -1,6 +1,6 @@
 # TaskLens 架构设计（单 Agent 版本）
 
-> 当前只冻结架构，不创建实现模块。代码路径和接口均属于开发前契约。
+> 架构已冻结，P0 实现已落地。本文中的模块边界仍是约束；真实 Chrome/CDP 和 Docker 验证属于交付前环境步骤。
 
 ## 1. 设计目标与约束
 
@@ -24,18 +24,23 @@
 
 ```text
 src/browser_harness/
-├── run.py                 # 既有 CLI；接入任务启动与旁路 hook
-├── agent_runtime.py       # 计划新增：单 Agent 状态机和动作校验循环
-├── browser_adapter.py     # 计划新增：Browser Harness/CDP 适配层
-├── observability.py       # 计划新增：脱敏、Pydantic 模型和证据构建
-├── storage.py             # 计划新增：SQLite repository 和迁移边界
-└── dashboard.py           # 计划新增：FastAPI 路由、页面资源、CLI serve
+├── run.py                 # 既有 CLI；保持上游入口不变
+├── tasklens_domain.py     # TaskSpec、Action、Observation、Assertion、AgentResult
+├── agent_runtime.py       # 单 Agent 状态机和动作校验循环
+├── model_provider.py      # Demo/OpenAI-compatible Provider
+├── tasklens_runtime.py    # Browser + Provider 组合层
+├── browser_adapter.py     # Browser Harness/CDP 适配层
+├── observability.py       # 脱敏、Pydantic 证据模型和构建
+├── storage.py             # SQLite repository 和迁移边界
+└── dashboard.py           # FastAPI 路由、页面资源、CLI serve
 ```
 
 | 模块 | 负责 | 不负责 |
 | --- | --- | --- |
-| `run.py` | 捕获开始/结束、退出码、已有 helper trace、启动任务 | 数据库细节、HTML 拼接 |
+| `run.py` | 保持上游 stdin 脚本执行和 helper trace | TaskLens 数据库细节、HTML 拼接 |
 | `agent_runtime.py` | 单 Agent 观察—动作—校验循环、步数/超时/重试预算 | 多 Agent 编排、CDP 底层连接 |
+| `model_provider.py` | 受控动作输出、Provider 错误分类和请求限长 | 浏览器动作、任意代码执行 |
+| `tasklens_runtime.py` | 组合 Browser Adapter 与 Model Provider | 业务断言和历史查询 |
 | `browser_adapter.py` | 将 daemon、Tab、DOM 和 helper 统一为动作接口 | 任务规划、历史查询 |
 | `observability.py` | Pydantic 记录模型、脱敏、证据构建 | 浏览器连接、网络服务 |
 | `storage.py` | SQLite schema、追加、过滤、汇总、迁移 | 页面展示、模型推理 |
@@ -134,7 +139,7 @@ SQLite 表至少包含 `runs`、`steps`、`assertions` 三张表，使用 `run_i
 
 - 首版：单进程 FastAPI + Uvicorn，前端为轻量静态资源；
 - 监听：默认 `127.0.0.1:8765`；
-- Docker：提供非特权镜像，浏览器连接通过显式 CDP 地址注入；
+- Docker：设计为非特权镜像，浏览器连接通过显式 CDP 地址注入；当前尚未完成镜像实测；
 - 云服务器：若显式开放端口，必须提示反向代理、访问控制和敏感数据风险；
 - 停止：Ctrl+C 只停止 Dashboard，不触碰 Harness daemon。
 

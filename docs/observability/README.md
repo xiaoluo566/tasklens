@@ -1,6 +1,6 @@
 # TaskLens 项目开发文档
 
-> 当前状态：**仅完成开发前设计，尚未实现 TaskLens 功能**。本文档是后续开发的约束与验收基线，不代表 Dashboard、API 或运行记录已经存在。
+> 当前状态：**P0 核心模块已实现，正在做真实浏览器与交付环境验证**。本文档同时保留设计约束、验收基线和未完成项；不能把 Demo Provider 的结果等同于真实模型效果。
 
 ## 项目定位
 
@@ -9,7 +9,7 @@ TaskLens 是一个面向复杂网页流程的单 Agent AI 浏览器测试个人�
 - 个人仓库：`xiaoluo566/tasklens`
 - 上游仓库：`browser-use/browser-harness`
 - 当前工作分支：`feat/observability-dashboard`
-- 当前阶段：设计冻结，暂不提交实现代码
+- 当前阶段：P0 实现完成，真实 Chrome/CDP、Docker 和窄屏 E2E 待验证
 
 ## 为什么做这个项目
 
@@ -34,14 +34,14 @@ TaskLens 不重新实现浏览器控制，而是在原有执行链路上增加�
 
 ## 计划中的使用方式
 
-以下命令是设计目标，当前版本尚未提供：
+以下命令可直接验证本地零网络演示：
 
 ```powershell
-./browser-harness task --goal "完成结算并确认订单状态"
-./browser-harness dashboard
+uv run tasklens task --demo --goal "打开演示任务"
+uv run tasklens dashboard --demo
 ```
 
-计划默认监听 `127.0.0.1:8765`，SQLite 记录位置为 `<BH_CONFIG_DIR>/observability/tasklens.db`。真正开始编码前，必须先完成需求评审、确认命名和安全边界，并在独立功能分支上按路线图执行 TDD。
+默认监听 `127.0.0.1:8765`，SQLite 记录位置为 `<BH_CONFIG_DIR>/tasklens.db`。真实模型需要显式设置 `TASKLENS_LLM_BASE_URL`、`TASKLENS_LLM_API_KEY` 和 `TASKLENS_LLM_MODEL`；没有配置时不会自动发起网络请求。
 
 ## 设计原则
 
@@ -50,3 +50,14 @@ TaskLens 不重新实现浏览器控制，而是在原有执行链路上增加�
 - **证据优先**：每个指标都能回溯到一次运行记录和 helper 步骤。
 - **最小依赖**：首版使用 FastAPI、Pydantic v2 和 SQLite，避免引入云端数据库和大型前端构建链。
 - **可撤回**：TaskLens 功能应可独立关闭、删除或回退，不改变开源依赖的核心 API。
+
+## 当前实现入口
+
+- `src/browser_harness/tasklens_domain.py`：TaskSpec、Action、Observation、Assertion 和 AgentResult 契约；
+- `src/browser_harness/agent_runtime.py`：单 Agent 状态机、步数/超时/重试预算；
+- `src/browser_harness/model_provider.py`：确定性 Demo Provider 与 OpenAI-compatible Provider；
+- `src/browser_harness/browser_adapter.py`：复用上游 helper/CDP 的动作适配层；
+- `src/browser_harness/observability.py`、`storage.py`：脱敏证据与 SQLite repository；
+- `src/browser_harness/dashboard.py`、`tasklens_cli.py`：FastAPI Dashboard、统一 envelope 和 CLI。
+
+详细的每个简历技术点解释见 [POINTS_EXPLAINED.md](POINTS_EXPLAINED.md)；可执行演示和验证边界见 [DEMO_RUNBOOK.md](DEMO_RUNBOOK.md)。

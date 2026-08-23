@@ -269,7 +269,8 @@ def _doctor_short_text(value, limit=None):
 
 def _is_snap_browser(path: str) -> bool:
     """True when a Chrome binary path lives under /snap/ (Snap confinement on Linux)."""
-    return bool(path) and "/snap/" in path.lower()
+    normalized = str(path or "").replace("\\", "/").lower()
+    return "/snap/" in normalized
 
 
 def _doctor_snap_probe_path(path: str) -> str:
